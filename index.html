@@ -3,532 +3,179 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI 4.0 - Xác Thực & Dự Đoán</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+    <title>Bảng Quản Trị Key</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
-
-        :root {
-            --bg-color: #020024;
-            --text-color: #f0f0f0;
-            --border-glow: rgba(0, 229, 255, 0.8);
-            --xiu-color: #00e5ff;
-            --tai-color: #ffd700;
-            --error-color: #ff3860;
-        }
-
-        body {
-            font-family: 'Orbitron', sans-serif;
-            background-color: var(--bg-color);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-            color: var(--text-color);
-            overflow-x: hidden;
-            position: relative;
-        }
-        
-        .galaxy-background {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; z-index: -2;
-        }
-        #stars {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-image: 
-                radial-gradient(1px 1px at 20px 30px, #eee, rgba(0,0,0,0)),
-                radial-gradient(1px 1px at 40px 70px, #fff, rgba(0,0,0,0)),
-                radial-gradient(1px 1px at 50px 160px, #ddd, rgba(0,0,0,0)),
-                radial-gradient(2px 2px at 90px 40px, #fff, rgba(0,0,0,0)),
-                radial-gradient(2px 2px at 130px 80px, #fff, rgba(0,0,0,0)),
-                radial-gradient(2px 2px at 160px 120px, #ddd, rgba(0,0,0,0));
-            background-repeat: repeat; background-size: 200px 200px;
-            animation: zoom-stars 40s linear infinite; z-index: -1;
-        }
-        @keyframes zoom-stars { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
-
-        #clock-container {
-            width: 100%; text-align: center; margin-bottom: 20px;
-            font-size: 1.2em; color: var(--xiu-color); text-shadow: 0 0 8px var(--xiu-color); z-index: 2;
-        }
-
-        .aurora-container {
-            position: relative; padding: 3px; border-radius: 23px;
-            margin-bottom: 20px; z-index: 2; overflow: hidden;
-            width: 100%; max-width: 500px;
-        }
-        .aurora-container::before {
-            content: ''; position: absolute; top: -50%; left: -50%;
-            width: 200%; height: 200%;
-            background: conic-gradient( transparent, rgba(0, 255, 255, 0.8), rgba(255, 0, 255, 0.8), rgba(255, 255, 0, 0.8), transparent 30% );
-            animation: rotate-aurora 6s linear infinite;
-        }
-        @keyframes rotate-aurora { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-        .main-container {
-            width: 100%; background-color: rgba(13, 2, 33, 0.85);
-            border-radius: 20px; padding: 30px; text-align: center;
-            backdrop-filter: blur(12px) saturate(180%); -webkit-backdrop-filter: blur(12px) saturate(180%);
-            position: relative; z-index: 1; box-sizing: border-box;
-        }
-        
-        h1, h2 {
-            font-weight: 700; text-transform: uppercase; letter-spacing: 2px;
-            text-shadow: 0 0 15px var(--border-glow);
-        }
-        h1 { font-size: 1.8em; margin: 0 0 25px 0; }
-        h2 { font-size: 1.5em; margin: 0 0 15px 0; }
-        
-        .hidden { display: none; }
-
-        /* --- Section Specific Styles --- */
-        .key-input, .custom-input, .md5-input {
-            width: 100%; padding: 15px; font-family: 'Orbitron', sans-serif;
-            background-color: rgba(0,0,0,0.4); border: 1px solid var(--border-glow);
-            border-radius: 10px; color: var(--text-color); font-size: 1.2em;
-            text-align: center; box-sizing: border-box; margin-bottom: 10px; transition: all 0.3s ease;
-        }
-        .key-input:focus, .custom-input:focus, .md5-input:focus { outline: none; box-shadow: 0 0 15px var(--border-glow); }
-        .key-input.error, .md5-input.error { border-color: var(--error-color); box-shadow: 0 0 15px var(--error-color); }
-        #error-message { color: var(--error-color); min-height: 20px; margin-bottom: 15px; font-size: 0.9em; text-shadow: 0 0 5px var(--error-color); }
-        
-        .confirm-btn, .enter-btn, .analyze-btn, .history-option-btn, .clear-btn {
-            background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
-            border: none; color: white; padding: 18px 40px; font-family: 'Orbitron', sans-serif;
-            font-size: 1.2em; font-weight: 700; border-radius: 50px; cursor: pointer;
-            transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 2px;
-            position: relative; overflow: hidden; box-shadow: 0 0 20px #dc2743; width: 100%;
-        }
-        .confirm-btn, .enter-btn { margin-top: 5px; }
-        .analyze-btn { margin-top: 20px; }
-        .confirm-btn:hover, .enter-btn:hover, .analyze-btn:hover, .history-option-btn:hover { transform: translateY(-3px) scale(1.05); box-shadow: 0 0 30px #bc1888; }
-        
-        .selection-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px; }
-        .provider-btn {
-            background: rgba(255,255,255,0.1); border: 1px solid var(--border-glow);
-            color: white; padding: 15px; font-family: 'Orbitron', sans-serif;
-            font-size: 1.1em; border-radius: 10px; cursor: pointer; transition: all 0.3s ease;
-        }
-        .provider-btn:hover { background: var(--border-glow); color: #000; transform: translateY(-2px); }
-
-        .prediction-area {
-            background: rgba(0,0,0,0.3); border-radius: 15px; padding: 30px;
-            min-height: 200px; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.1);
-            perspective: 1000px; position: relative; overflow: hidden;
-        }
-        .scan-line {
-            position: absolute; top: 0; left: 0; width: 100%; height: 4px;
-            background: linear-gradient(90deg, transparent, var(--xiu-color), transparent);
-            box-shadow: 0 0 10px var(--xiu-color); animation: scan 1.5s linear forwards; opacity: 0;
-        }
-        @keyframes scan { 0% { top: 0; opacity: 1; } 100% { top: 100%; opacity: 0; } }
-        #status-text { color: #ccc; min-height: 24px; margin-bottom: 10px; }
-        .prediction-text {
-            font-size: 7em; font-weight: 900; text-transform: uppercase;
-            letter-spacing: 10px; margin: 10px 0 0 0;
-            background-image: linear-gradient(90deg, #ff00ae, #b600ff, #00b8ff, #00ff95, #b4ff00, #ffb300, #ff00ae);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            background-size: 200% 200%;
-            animation: rainbow-flow 2s linear infinite, pop-in 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-            opacity: 0;
-        }
-        .prediction-text.visible { opacity: 1; }
-        @keyframes pop-in { 0% { transform: scale(0.5); opacity: 0; } 80% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
-        
-        #history-options { 
-            display: flex; 
-            flex-direction: column;
-            gap: 10px;
-        }
-        .history-row {
-            display: flex;
-            justify-content: space-between;
-            gap: 10px;
-        }
-        .history-option-btn {
-            flex: 1;
-            background-color: rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.1);
-            color: var(--text-color);
-            padding: 15px;
-            border-radius: 10px;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.1em;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        .history-option-btn.selected-tai {
-            background-color: var(--tai-color);
-            color: #000;
-        }
-        .history-option-btn.selected-xiu {
-            background-color: var(--xiu-color);
-            color: #000;
-        }
-
-        .contact-info {
-            font-size: 1.1em; letter-spacing: 1px;
-        }
-        .contact-info a {
-            color: var(--text-color); text-decoration: none; display: block;
-            margin: 10px 0; transition: color 0.3s ease, transform 0.3s ease;
-        }
-        .contact-info a:hover { color: var(--xiu-color); transform: scale(1.05); }
-        .admin-text {
-            font-weight: 900;
-            background-image: linear-gradient(90deg, #ff00ff, #00ffff, #ffff00, #00ff00, #ff00ff);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            background-size: 200% auto; animation: rainbow-flow 2s linear infinite;
-        }
-        @keyframes rainbow-flow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-
-        .history-list {
-            text-align: left;
-            width: 100%;
-            max-height: 200px;
-            overflow-y: auto;
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 10px;
-            padding: 10px;
-            margin-top: 20px;
-            font-size: 0.9em;
-        }
-        .history-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px dashed rgba(255,255,255,0.1);
-        }
-        .history-item:last-child {
-            border-bottom: none;
-        }
-        .history-item .result {
-            font-weight: 700;
-        }
-        .history-item .result.tai {
-            color: var(--tai-color);
-        }
-        .history-item .result.xiu {
-            color: var(--xiu-color);
-        }
-
-        @media (max-width: 500px) {
-            body { padding: 10px; }
-            .main-container { padding: 20px; }
-            h1 { font-size: 1.5em; }
-            h2 { font-size: 1.3em; }
-            #clock-container, .contact-info, .key-input, .confirm-btn, .provider-btn, .custom-input, .enter-btn, .clear-btn { font-size: 1em; }
-            .prediction-text { font-size: 4.5em; letter-spacing: 5px; }
-            .history-option-btn { font-size: 1em; padding: 10px; }
+        body { font-family: 'Orbitron', sans-serif; background: #0d0d0d; color: #e0e0e0; padding: 2rem; }
+        .container { max-width: 900px; margin: auto; background: #1a1a1a; padding: 2rem; border-radius: 1rem; box-shadow: 0 0 20px rgba(255, 0, 0, 0.3); }
+        .input-field { width: 100%; padding: 0.75rem; margin-bottom: 1rem; border-radius: 0.5rem; background: #282828; border: 1px solid #333; color: white; }
+        .btn-primary { background: linear-gradient(135deg, #ff0000, #b30000); color: white; padding: 0.75rem; border-radius: 0.5rem; font-weight: bold; transition: background 0.3s; }
+        .btn-primary:hover { background: linear-gradient(135deg, #ff3333, #e60000); }
+        .btn-delete { background-color: #dc2626; color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: bold; transition: background 0.3s; }
+        .btn-delete:hover { background-color: #b91c1c; }
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        th, td { border: 1px solid #333; padding: 0.75rem; text-align: left; }
+        th { background: #282828; }
+        tr:nth-child(even) { background-color: #1f1f1f; }
+        .input-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+        @media (max-width: 768px) {
+            .input-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
-    <div class="galaxy-background"></div>
-    <div id="stars"></div>
-    <div id="clock-container"></div>
+    <div class="container">
+        <h1 class="text-3xl font-bold text-center mb-6 text-red-400">BẢNG QUẢN TRỊ KEY</h1>
 
-    <div id="key-page">
-        <div class="aurora-container">
-            <div class="main-container">
-                <h1>KÍCH HOẠT TOOL</h1>
-                <input type="text" id="key-input" class="key-input" placeholder="Nhập Key Kích Hoạt">
-                <p id="error-message"></p>
-                <button id="confirm-btn" class="confirm-btn">Xác Nhận</button>
-            </div>
-        </div>
-    </div>
-    
-    <div id="provider-page" class="hidden">
-        <div class="aurora-container">
-            <div class="main-container">
-                <h1>CHỌN NHÀ CÁI</h1>
-                <div class="selection-grid">
-                    <button class="provider-btn" data-provider="GO88">GO88</button>
-                    <button class="provider-btn" data-provider="HITCLUB">HITCLUB</button>
-                    <button class="provider-btn" data-provider="SUNWIN">SUNWIN</button>
-                    <button class="provider-btn" data-provider="B52">B52</button>
+        <div class="bg-gray-800 p-6 rounded-lg mb-6">
+            <h2 class="text-xl font-bold mb-4">Tạo Key Mới</h2>
+            <div class="input-grid">
+                <div>
+                    <label for="key-prefix" class="block text-sm font-medium text-gray-400 mb-1">Tiền tố Key:</label>
+                    <input type="text" id="key-prefix" class="input-field" value="NARUTO-" placeholder="VD: NARUTO-">
                 </div>
-                <input type="text" id="custom-provider-input" class="custom-input" placeholder="Hoặc nhập tên nhà cái khác">
-                <button id="enter-btn" class="enter-btn">Vào Tool</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="tool-page" class="hidden">
-        <div class="aurora-container">
-            <div class="main-container">
-                <h1 id="tool-title">AI PREDICTOR</h1>
-                <h2>KẾT QUẢ 3 VÁN GẦN ĐÂY</h2>
-                <div id="history-options">
-                    <div class="history-row">
-                        <button class="history-option-btn" data-result="TÀI" data-index="0">Ván 1: TÀI</button>
-                        <button class="history-option-btn" data-result="XỈU" data-index="0">Ván 1: XỈU</button>
-                    </div>
-                    <div class="history-row">
-                        <button class="history-option-btn" data-result="TÀI" data-index="1">Ván 2: TÀI</button>
-                        <button class="history-option-btn" data-result="XỈU" data-index="1">Ván 2: XỈU</button>
-                    </div>
-                    <div class="history-row">
-                        <button class="history-option-btn" data-result="TÀI" data-index="2">Ván 3: TÀI</button>
-                        <button class="history-option-btn" data-result="XỈU" data-index="2">Ván 3: XỈU</button>
-                    </div>
+                <div>
+                    <label for="expiry-time" class="block text-sm font-medium text-gray-400 mb-1">Thời gian sử dụng (ngày):</label>
+                    <input type="number" id="expiry-time" class="input-field" value="7" min="1">
                 </div>
-                <div class="input-area">
-                    <label for="md5-input">Nhập Mã MD5</label>
-                    <input type="text" id="md5-input" class="md5-input" placeholder="Nhập mã MD5 (32 ký tự)" maxlength="32">
-                </div>
-                <div id="prediction-area" class="prediction-area">
-                    <p id="status-text">Chờ lệnh phân tích...</p>
-                    <p id="prediction-text" class="prediction-text"></p>
-                </div>
-                <button id="analyze-btn" class="analyze-btn">Phân Tích</button>
-                <button id="reset-options-btn" class="clear-btn" style="margin-top: 15px;">Chọn Lại</button>
-            </div>
-        </div>
-
-        <div class="aurora-container">
-            <div class="main-container">
-                <h2>LỊCH SỬ DỰ ĐOÁN</h2>
-                <div id="history-list" class="history-list">
-                    <p style="text-align: center; color: #aaa;">Chưa có lịch sử</p>
+                <div>
+                    <label for="max-devices" class="block text-sm font-medium text-gray-400 mb-1">Số thiết bị dùng:</label>
+                    <input type="number" id="max-devices" class="input-field" value="1" min="1">
                 </div>
             </div>
+            <button id="generate-key-btn" class="btn-primary w-full mt-4">Tạo Key</button>
+            <p id="status-message" class="text-center mt-2 text-sm"></p>
         </div>
 
-        <div class="aurora-container">
-              <div class="main-container contact-info">
-                  <a href="https://t.me/rice7788" target="_blank">TELEGRAM : t.me/rice7788</a>
-                  <a href="https://www.facebook.com/quan.pham.948838" target="_blank">
-                      <span class="admin-text">ADMIN</span> : LIÊN HỆ
-                  </a>
-              </div>
+        <div class="bg-gray-800 p-6 rounded-lg">
+            <h2 class="text-xl font-bold mb-4">Danh sách Key</h2>
+            <table class="text-sm">
+                <thead>
+                    <tr>
+                        <th class="w-1/3">Key</th>
+                        <th>Trạng thái</th>
+                        <th>UID Thiết bị</th>
+                        <th>Số thiết bị dùng</th>
+                        <th>Lần dùng gần đây nhất</th>
+                        <th>Thời gian hết hạn</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody id="keys-table-body">
+                </tbody>
+            </table>
         </div>
     </div>
 
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script>
-        // --- Common Elements ---
-        const clockContainer = document.getElementById('clock-container');
-        
-        // --- Page Containers ---
-        const keyPage = document.getElementById('key-page');
-        const providerPage = document.getElementById('provider-page');
-        const toolPage = document.getElementById('tool-page');
-
-        // --- Key Page Elements ---
-        const keyInput = document.getElementById('key-input');
-        const confirmBtn = document.getElementById('confirm-btn');
-        const errorMessage = document.getElementById('error-message');
-        const CORRECT_KEY = "premium01"; 
-
-        // --- Provider Page Elements ---
-        const customProviderInput = document.getElementById('custom-provider-input');
-        const providerButtons = document.querySelectorAll('.provider-btn');
-        const enterBtn = document.getElementById('enter-btn');
-
-        // --- Tool Page Elements ---
-        const toolTitle = document.getElementById('tool-title');
-        const historyOptionsDiv = document.getElementById('history-options');
-        const historyOptionButtons = document.querySelectorAll('.history-option-btn');
-        const md5Input = document.getElementById('md5-input');
-        const analyzeBtn = document.getElementById('analyze-btn');
-        const resetOptionsBtn = document.getElementById('reset-options-btn');
-        let predictionText = document.getElementById('prediction-text');
-        const predictionArea = document.getElementById('prediction-area');
-        const statusText = document.getElementById('status-text');
-        const historyList = document.getElementById('history-list');
-        
-        let predictionHistory = [];
-
-        // --- Sound Effects ---
-        let soundsReady = false;
-        const clickSynth = new Tone.MembraneSynth().toDestination();
-        const successSynth = new Tone.PolySynth(Tone.Synth, { oscillator: { type: "fatsawtooth" }, envelope: { attack: 0.01, decay: 0.2, sustain: 0.1, release: 0.3 } }).toDestination();
-        const analyzingSynth = new Tone.AMSynth({ harmonicity: 1.5, envelope: { attack: 0.01, decay: 0.1, sustain: 0.1, release: 0.1 }, modulation: { type: "square" }, modulationEnvelope: { attack: 0.01, decay: 0.2, sustain: 0.2, release: 0.2 } }).toDestination();
-        const startAudio = () => { if (Tone.context.state !== 'running') { Tone.context.resume(); } soundsReady = true; document.body.removeEventListener('click', startAudio); };
-        document.body.addEventListener('click', startAudio);
-
-        // --- Common Functions ---
-        const updateClock = () => {
-            const now = new Date();
-            const options = { timeZone: 'Asia/Ho_Chi_Minh', hour12: false, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' };
-            const formatter = new Intl.DateTimeFormat('vi-VN', options);
-            const parts = formatter.formatToParts(now).reduce((acc, part) => ({ ...acc, [part.type]: part.value }), {});
-            clockContainer.textContent = ` ${parts.hour}:${parts.minute}:${parts.second} - ${parts.day}/${parts.month}/${parts.year}`;
+        // CẤU HÌNH FIREBASE CỦA BẠN
+        const firebaseConfig = {
+          apiKey: "AIzaSyBKGCVdZxmyw6VN0b7aYRQnCqpqfWwASXU",
+          authDomain: "lllllk-20ede.firebaseapp.com",
+          databaseURL: "https://lllllk-20ede-default-rtdb.firebaseio.com",
+          projectId: "lllllk-20ede",
+          storageBucket: "lllllk-20ede.firebasestorage.app",
+          messagingSenderId: "314220235218",
+          appId: "1:314220235218:web:679c9a246c314b535f200b",
+          measurementId: "G-DM08514Z1N"
         };
+        firebase.initializeApp(firebaseConfig);
 
-        function showPage(pageToShow) {
-            keyPage.classList.add('hidden');
-            providerPage.classList.add('hidden');
-            toolPage.classList.add('hidden');
-            pageToShow.classList.remove('hidden');
+        const database = firebase.database();
+        const validKeysRef = database.ref('validKeys');
+
+        function generateUniqueKey(prefix) {
+            return prefix + Math.random().toString(36).substr(2, 8).toUpperCase();
         }
 
-        function addHistoryItem(result) {
-            const now = new Date();
-            const timeString = now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
-            const dateString = now.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
+        function createKey() {
+            const prefix = document.getElementById('key-prefix').value.trim();
+            const expiryDays = parseInt(document.getElementById('expiry-time').value, 10);
+            const maxDevices = parseInt(document.getElementById('max-devices').value, 10);
+            const statusMessage = document.getElementById('status-message');
+
+            if (isNaN(expiryDays) || expiryDays <= 0) {
+                statusMessage.textContent = 'Vui lòng nhập thời gian hợp lệ.';
+                statusMessage.className = 'text-center mt-2 text-sm text-red-500';
+                return;
+            }
+            if (isNaN(maxDevices) || maxDevices <= 0) {
+                statusMessage.textContent = 'Vui lòng nhập số thiết bị hợp lệ.';
+                statusMessage.className = 'text-center mt-2 text-sm text-red-500';
+                return;
+            }
+
+            const newKey = generateUniqueKey(prefix);
+            const expiryTime = Date.now() + expiryDays * 24 * 60 * 60 * 1000;
             
-            const historyItem = {
-                time: `${timeString} ${dateString}`,
-                result: result
+            const keyData = { 
+                expiry: expiryTime, 
+                max_devices: maxDevices,
+                devices: {} 
             };
-            predictionHistory.unshift(historyItem); // Add to the beginning
-            if (predictionHistory.length > 10) { // Limit to 10 items
-                predictionHistory.pop();
-            }
-            renderHistory();
-        }
 
-        function renderHistory() {
-            historyList.innerHTML = '';
-            if (predictionHistory.length === 0) {
-                historyList.innerHTML = '<p style="text-align: center; color: #aaa;">Chưa có lịch sử</p>';
-                return;
-            }
-            predictionHistory.forEach(item => {
-                const div = document.createElement('div');
-                div.className = 'history-item';
-                div.innerHTML = `
-                    <span>${item.time}</span>
-                    <span class="result ${item.result === 'TÀI' ? 'tai' : 'xiu'}">${item.result}</span>
-                `;
-                historyList.appendChild(div);
-            });
-        }
-
-        // --- Key Page Logic ---
-        confirmBtn.addEventListener('click', () => {
-            if (!soundsReady) startAudio();
-            clickSynth.triggerAttackRelease("C2", "8n", Tone.now());
-            const enteredKey = keyInput.value.trim();
-            if (enteredKey === CORRECT_KEY) {
-                errorMessage.textContent = "";
-                keyInput.classList.remove('error');
-                showPage(providerPage);
-            } else {
-                errorMessage.textContent = "Key không chính xác! Vui lòng thử lại.";
-                keyInput.classList.add('error');
-            }
-        });
-
-        // --- Provider Page Logic ---
-        providerButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                if (!soundsReady) startAudio();
-                clickSynth.triggerAttackRelease("C3", "8n", Tone.now());
-                customProviderInput.value = button.getAttribute('data-provider');
-            });
-        });
-
-        enterBtn.addEventListener('click', () => {
-            if (!soundsReady) startAudio();
-            clickSynth.triggerAttackRelease("C4", "8n", Tone.now());
-            const provider = customProviderInput.value.trim();
-            if (provider) {
-                toolTitle.textContent = `AI PREDICTOR - ${provider.toUpperCase()}`;
-                showPage(toolPage);
-            } else {
-                alert('Vui lòng chọn hoặc nhập một nhà cái!');
-            }
-        });
-
-        // --- Tool Page Logic ---
-        let selectedHistory = new Array(3).fill(null);
-
-        historyOptionButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                const index = button.dataset.index;
-                const result = button.dataset.result;
-
-                document.querySelectorAll(`.history-option-btn[data-index="${index}"]`).forEach(btn => {
-                    btn.classList.remove('selected-tai', 'selected-xiu');
+            validKeysRef.child(newKey).set(keyData)
+                .then(() => {
+                    statusMessage.textContent = `Tạo key thành công: ${newKey}`;
+                    statusMessage.className = 'text-center mt-2 text-sm text-green-500';
+                })
+                .catch(error => {
+                    statusMessage.textContent = 'Lỗi khi tạo key: ' + error.message;
+                    statusMessage.className = 'text-center mt-2 text-sm text-red-500';
                 });
-                
-                button.classList.add(result === 'TÀI' ? 'selected-tai' : 'selected-xiu');
-                selectedHistory[index] = result;
-            });
-        });
+        }
 
-        md5Input.addEventListener('input', (e) => {
-            e.target.value = e.target.value.replace(/[^a-fA-F0-9]/g, '').toLowerCase();
-        });
-
-        analyzeBtn.addEventListener('click', () => {
-            if (!soundsReady) startAudio();
-            clickSynth.triggerAttackRelease("C2", "8n", Tone.now());
-
-            const md5Code = md5Input.value.trim();
-            if (md5Code.length !== 32) {
-                statusText.textContent = 'Lỗi: Vui lòng nhập ĐỦ 32 ký tự MD5!';
-                md5Input.classList.add('error');
-                predictionText.classList.remove('visible');
-                return;
+        window.deleteKey = function(key) {
+            if (confirm(`Bạn có chắc chắn muốn xóa key "${key}"?`)) {
+                validKeysRef.child(key).remove()
+                    .then(() => { console.log(`Key ${key} đã được xóa.`); })
+                    .catch(error => { console.error("Lỗi khi xóa key: ", error); });
             }
-            md5Input.classList.remove('error');
+        }
 
-            const selectedCount = selectedHistory.filter(r => r !== null).length;
-            if (selectedCount !== 3) {
-                statusText.textContent = 'Lỗi: Vui lòng chọn đủ 3 kết quả gần nhất!';
-                predictionText.classList.remove('visible');
-                return;
-            }
-
-            analyzeBtn.disabled = true;
-            predictionText.classList.remove('visible');
-            statusText.textContent = 'Đang phân tích...';
-
-            const scanLine = document.createElement('div');
-            scanLine.className = 'scan-line';
-            predictionArea.appendChild(scanLine);
-            setTimeout(() => scanLine.remove(), 1500);
-
-            analyzingSynth.triggerAttackRelease("C3", "32n", Tone.now() + 0.1);
-            analyzingSynth.triggerAttackRelease("G3", "32n", Tone.now() + 0.3);
-            analyzingSynth.triggerAttackRelease("C4", "32n", Tone.now() + 0.5);
-            
-            setTimeout(() => {
-                let taiCount = selectedHistory.filter(r => r === 'TÀI').length;
-                let xiuCount = selectedHistory.filter(r => r === 'XỈU').length;
+        function renderKeysTable(keys) {
+            const tableBody = document.getElementById('keys-table-body');
+            tableBody.innerHTML = '';
+            Object.keys(keys).forEach(key => {
+                const keyData = keys[key];
+                const row = document.createElement('tr');
+                const now = Date.now();
+                const deviceCount = keyData.devices ? Object.keys(keyData.devices).length : 0;
                 
-                let finalPrediction;
-                if (taiCount >= 2) {
-                    finalPrediction = 'TÀI';
-                } else if (xiuCount >= 2) {
-                    finalPrediction = 'XỈU';
-                } else {
-                    finalPrediction = 'XỈU'; // Default to XỈU if no clear pattern
+                const hasDevices = deviceCount > 0;
+                const statusText = keyData.expiry < now ? 'Đã hết hạn' : (hasDevices ? 'Đã sử dụng' : 'Chưa sử dụng');
+                const statusClass = keyData.expiry < now ? 'text-red-400' : (hasDevices ? 'text-yellow-400' : 'text-green-400');
+                
+                let lastUsedTime = 'N/A';
+                if (hasDevices) {
+                    const deviceUids = Object.keys(keyData.devices);
+                    const lastUsedTimestamps = deviceUids.map(uid => keyData.devices[uid].lastUsed);
+                    const latestTimestamp = Math.max(...lastUsedTimestamps);
+                    lastUsedTime = new Date(latestTimestamp).toLocaleString('vi-VN');
                 }
-                
-                statusText.textContent = `Phân tích hoàn tất!`;
-                predictionText.textContent = finalPrediction;
-                predictionText.classList.add('visible');
 
-                addHistoryItem(finalPrediction);
+                const deviceUidsString = hasDevices ? Object.keys(keyData.devices).join(', ') : 'N/A';
 
-                successSynth.triggerAttackRelease(finalPrediction === 'TÀI' ? ["C4", "E4", "G4"] : ["C4", "D#4", "G4"], "8n", Tone.now());
-                analyzeBtn.disabled = false;
-            }, 1500);
-        });
-
-        resetOptionsBtn.addEventListener('click', () => {
-            selectedHistory = new Array(3).fill(null);
-            historyOptionButtons.forEach(btn => {
-                btn.classList.remove('selected-tai', 'selected-xiu');
+                row.innerHTML = `
+                    <td>${key}</td>
+                    <td class="${statusClass}">${statusText}</td>
+                    <td>${deviceUidsString}</td>
+                    <td>${deviceCount} / ${keyData.max_devices || '∞'}</td>
+                    <td>${lastUsedTime}</td>
+                    <td>${new Date(keyData.expiry).toLocaleString('vi-VN')}</td>
+                    <td><button class="btn-delete" onclick="deleteKey('${key}')">Xóa</button></td>
+                `;
+                tableBody.appendChild(row);
             });
-            md5Input.value = '';
-            statusText.textContent = 'Chờ lệnh phân tích...';
-            predictionText.classList.remove('visible');
-        });
+        }
 
-        // --- Initialization ---
-        document.addEventListener('DOMContentLoaded', () => {
-            updateClock();
-            setInterval(updateClock, 1000);
+        document.getElementById('generate-key-btn').addEventListener('click', createKey);
+        validKeysRef.on('value', snapshot => {
+            const keys = snapshot.val() || {};
+            renderKeysTable(keys);
         });
     </script>
 </body>
